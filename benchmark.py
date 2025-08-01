@@ -1,6 +1,6 @@
 from minio import Minio
 from minio.error import S3Error
-import time
+import time, io
 
 client = Minio(
     "localhost:9000",
@@ -21,7 +21,7 @@ object_name = "testfile-10MB"
 
 # Subida
 start = time.time()
-client.put_object(bucket, object_name, data, len(data))
+client.put_object(bucket, object_name, io.BytesIO(data), len(data))
 upload_time = time.time() - start
 print(f"Upload 10MB: {upload_time:.2f}s")
 
