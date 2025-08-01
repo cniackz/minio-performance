@@ -1,0 +1,27 @@
+name: MinIO Speed Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-speed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          pip install -r requirements.txt
+
+      - name: Download and start MinIO
+        run: |
+          wget https://dl.min.io/server/minio/release/linux-amd64/minio
+          chmod +x minio
+          ./minio server /tmp/data --address ":9000" &
+          sleep 5
+
+      - name: Run benchmark
+        run: python benchmark.py
