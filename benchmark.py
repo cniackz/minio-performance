@@ -26,8 +26,10 @@ if not client.bucket_exists(bucket):
 
 upload_times = []
 download_times = []
+heartbeat_interval = 60  # seconds
+last_heartbeat = time.time()
 
-for _ in range(1000):
+for i in range(1000):
     # Upload
     start = time.time()
     client.put_object(bucket, object_name, io.BytesIO(data), object_size)
@@ -40,8 +42,16 @@ for _ in range(1000):
     response.close()
     download_times.append(time.time() - start)
 
+    # Emit heartbeat every minute
+    now = time.time()
+    if now - last_heartbeat >= heartbeat_interval:
+        avg_put = statistics.mean(upload_times)
+        avg_get = statistics.mean(download_times)
+        print(f"Still running... [{i+1}/1000] Average PUT: {avg_put:.2f}s, GET: {avg_get:.2f}s")
+        last_heartbeat = now
+
 # Final summary
-print(f"File Size: 1GB")
+print(f"\nFile Size: 1GB")
 print(f"MinIO Version: {version}")
 print(f"Average PUT: {statistics.mean(upload_times):.2f}s")
 print(f"Average GET: {statistics.mean(download_times):.2f}s")
