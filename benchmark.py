@@ -1,5 +1,8 @@
 from minio import Minio
-import time, io, statistics, requests
+import time, io, statistics, requests, sys
+
+# Flush output line by line for GitHub Actions
+sys.stdout.reconfigure(line_buffering=True)
 
 client = Minio(
     "localhost:9000",
