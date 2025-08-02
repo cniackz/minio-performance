@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-speed:
+  minio-speed:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,6 +20,31 @@ jobs:
         run: |
           wget https://dl.min.io/server/minio/release/linux-amd64/minio
           chmod +x minio
+          VERSION=$(./minio --version | head -n1 | awk '{print $3}')
+          echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
+          ./minio server /tmp/data --address ":9000" &
+          sleep 5
+
+      - name: Run benchmark
+        run: python benchmark.py
+  aistor-speed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          pip install -r requirements.txt
+
+      - name: Download and start MinIO
+        run: |
+          wget https://dl.min.io/aistor/minio/release/linux-amd64/minio
+          chmod +x minio
+          VERSION=$(./minio --version | head -n1 | awk '{print $3}')
+          echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
           ./minio server /tmp/data --address ":9000" &
           sleep 5
 

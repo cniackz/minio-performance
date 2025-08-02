@@ -1,5 +1,5 @@
 from minio import Minio
-import time, io, statistics, requests, sys
+import time, io, statistics, requests, sys, os
 
 # Flush output line by line for GitHub Actions
 sys.stdout.reconfigure(line_buffering=True)
@@ -15,13 +15,7 @@ bucket = "bench-loop"
 object_name = "testfile-1GB"
 object_size = 1024 * 1024 * 1024  # 1 GB
 data = b"x" * object_size
-
-# Get MinIO version
-try:
-    r = requests.get("http://localhost:9000/minio/version")
-    version = r.json().get("version", "unknown")
-except Exception as e:
-    version = f"unknown ({e})"
+version = os.environ.get("MINIO_VERSION", "unknown")
 
 print(f"\nFile Size: 1GB")
 print(f"MinIO Version: {version}")
