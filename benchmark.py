@@ -23,6 +23,9 @@ try:
 except Exception as e:
     version = f"unknown ({e})"
 
+print(f"\nFile Size: 1GB")
+print(f"MinIO Version: {version}")
+
 # Setup bucket
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
@@ -54,7 +57,5 @@ for i in range(1000):
         last_heartbeat = now
 
 # Final summary
-print(f"\nFile Size: 1GB")
-print(f"MinIO Version: {version}")
 print(f"Average PUT: {statistics.mean(upload_times):.2f}s")
 print(f"Average GET: {statistics.mean(download_times):.2f}s")
