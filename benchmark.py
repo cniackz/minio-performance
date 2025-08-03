@@ -24,12 +24,17 @@ print(f"MinIO Version: {version}")
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
 
+# Target total duration in seconds
+target_duration_sec = 20 * 60  # 20 minutes
+avg_iteration_time = 3.2  # Estimated seconds per PUT+GET
+total_iterations = int(target_duration_sec / avg_iteration_time)
+
 upload_times = []
 download_times = []
 heartbeat_interval = 60  # seconds
 last_heartbeat = time.time()
 
-for i in range(1000):
+for i in range(total_iterations):
     # Upload
     start = time.time()
     client.put_object(bucket, object_name, io.BytesIO(data), object_size)
@@ -47,7 +52,7 @@ for i in range(1000):
     if now - last_heartbeat >= heartbeat_interval:
         avg_put = statistics.mean(upload_times)
         avg_get = statistics.mean(download_times)
-        print(f"Still running... [{i+1}/1000] Average PUT: {avg_put:.2f}s, GET: {avg_get:.2f}s")
+        print(f"Still running... [{i+1}/{total_iterations}] Average PUT: {avg_put:.2f}s, GET: {avg_get:.2f}s")
         last_heartbeat = now
 
 # Final summary

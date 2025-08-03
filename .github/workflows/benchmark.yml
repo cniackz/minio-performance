@@ -39,13 +39,18 @@ jobs:
           sudo apt-get install -y curl
           pip install -r requirements.txt
 
-      - name: Download and start MinIO
+      - name: Write AIStore license
+        run: echo "$AISTOR_LICENSE" > license.txt
+        env:
+          AISTOR_LICENSE: ${{ secrets.AISTOR_LICENSE }}
+
+      - name: Start AIStore
         run: |
           wget https://dl.min.io/aistor/minio/release/linux-amd64/minio
           chmod +x minio
           VERSION=$(./minio --version | head -n1 | awk '{print $3}')
           echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
-          ./minio server /tmp/data --address ":9000" &
+          ./minio server /tmp/data --address ":9000" --license license.txt &
           sleep 5
 
       - name: Run benchmark
