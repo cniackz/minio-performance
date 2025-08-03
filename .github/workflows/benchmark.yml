@@ -25,8 +25,18 @@ jobs:
           ./minio server /tmp/data --address ":9000" &
           sleep 5
 
+      - name: Runner Info
+        run: |
+          echo "CPU Info:"
+          lscpu
+          echo "Memory Info:"
+          free -h
+          echo "Disk Info:"
+          df -h /
+
       - name: Run benchmark
         run: python benchmark.py
+
   aistor-speed:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +62,15 @@ jobs:
           echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
           ./minio server /tmp/data --address ":9000" --license license.txt &
           sleep 5
+
+      - name: Runner Info
+        run: |
+          echo "CPU Info:"
+          lscpu
+          echo "Memory Info:"
+          free -h
+          echo "Disk Info:"
+          df -h /
 
       - name: Run benchmark
         run: python benchmark.py
