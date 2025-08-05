@@ -30,7 +30,7 @@ version = os.environ.get("MINIO_VERSION", "unknown")
 
 # Define object size from env (e.g., "1GB", "10GB", "100GB")
 size_str = os.environ.get("OBJECT_SIZE", "1GB").upper()
-size_map = {"1GB": 1, "10GB": 10, "100GB": 100}
+size_map = {"128KB": 10, "1MB": 10, "1GB": 10}
 object_size = size_map.get(size_str, 1) * 1024 * 1024 * 1024
 object_name = f"testfile-{size_str}"
 data = b"x" * (1024 * 1024)  # 1MB buffer reused
@@ -60,6 +60,9 @@ for i in range(total_iterations):
     _ = response.read()
     response.close()
     download_times.append(time.time() - start)
+
+    # 🧹 Clean up to free space
+    client.remove_object(bucket, object_name)
 
     print(f"[{i+1}/{total_iterations}] PUT: {upload_times[-1]:.2f}s, GET: {download_times[-1]:.2f}s")
 
