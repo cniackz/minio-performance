@@ -10,6 +10,8 @@ class FakeStream(io.RawIOBase):
         chunk = min(n, self.remaining)
         self.remaining -= chunk
         return b"x" * chunk
+    def readable(self):
+        return True
 
 # Flush output line by line for GitHub Actions
 sys.stdout.reconfigure(line_buffering=True)
