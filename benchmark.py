@@ -1,43 +1,37 @@
 from minio import Minio
-import time, io, statistics, requests, sys, os
+import time, io, statistics, sys, os
 
 # Flush output line by line for GitHub Actions
 sys.stdout.reconfigure(line_buffering=True)
 
-client = Minio(
-    "localhost:9000",
-    access_key="minioadmin",
-    secret_key="minioadmin",
-    secure=False,
-)
+client = Minio("localhost:9000", access_key="minioadmin", secret_key="minioadmin", secure=False)
 
 bucket = "bench-loop"
-object_name = "testfile-1GB"
-object_size = 1024 * 1024 * 1024  # 1 GB
-data = b"x" * object_size
 version = os.environ.get("MINIO_VERSION", "unknown")
 
-print(f"\nFile Size: 1GB")
-print(f"MinIO Version: {version}")
+# Define object size from env (e.g., "1GB", "10GB", "100GB")
+size_str = os.environ.get("OBJECT_SIZE", "1GB").upper()
+size_map = {"1GB": 1, "10GB": 10, "100GB": 100}
+object_size = size_map.get(size_str, 1) * 1024 * 1024 * 1024
+object_name = f"testfile-{size_str}"
+data = b"x" * (1024 * 1024)  # 1MB buffer reused
 
-# Setup bucket
+# Set number of iterations based on object size
+iteration_map = {"1GB": 300, "10GB": 5, "100GB": 1}
+total_iterations = iteration_map.get(size_str, 1)
+
+print(f"\nFile Size: {size_str}")
+print(f"MinIO Version: {version}")
+print(f"Running {total_iterations} iterations...\n")
+
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
 
-# Target total duration in seconds
-target_duration_sec = 20 * 60  # 20 minutes
-avg_iteration_time = 3.2  # Estimated seconds per PUT+GET
-total_iterations = int(target_duration_sec / avg_iteration_time)
-
-upload_times = []
-download_times = []
-heartbeat_interval = 60  # seconds
-last_heartbeat = time.time()
-
+upload_times, download_times = [], []
 for i in range(total_iterations):
     # Upload
     start = time.time()
-    client.put_object(bucket, object_name, io.BytesIO(data), object_size)
+    client.put_object(bucket, object_name, io.BytesIO(b"x" * object_size), object_size)
     upload_times.append(time.time() - start)
 
     # Download
@@ -47,14 +41,7 @@ for i in range(total_iterations):
     response.close()
     download_times.append(time.time() - start)
 
-    # Emit heartbeat every minute
-    now = time.time()
-    if now - last_heartbeat >= heartbeat_interval:
-        avg_put = statistics.mean(upload_times)
-        avg_get = statistics.mean(download_times)
-        print(f"Still running... [{i+1}/{total_iterations}] Average PUT: {avg_put:.2f}s, GET: {avg_get:.2f}s")
-        last_heartbeat = now
+    print(f"[{i+1}/{total_iterations}] PUT: {upload_times[-1]:.2f}s, GET: {download_times[-1]:.2f}s")
 
-# Final summary
-print(f"Average PUT: {statistics.mean(upload_times):.2f}s")
+print(f"\nAverage PUT: {statistics.mean(upload_times):.2f}s")
 print(f"Average GET: {statistics.mean(download_times):.2f}s")

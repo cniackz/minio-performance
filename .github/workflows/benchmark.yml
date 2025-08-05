@@ -34,8 +34,21 @@ jobs:
           echo "Disk Info:"
           df -h /
 
-      - name: Run benchmark
+      - name: Benchmark 1GB
+        env:
+          OBJECT_SIZE: 1GB
         run: python benchmark.py
+
+      - name: Benchmark 10GB
+        env:
+          OBJECT_SIZE: 10GB
+        run: python benchmark.py
+
+      - name: Benchmark 100GB
+        env:
+          OBJECT_SIZE: 100GB
+        run: python benchmark.py
+
 
   aistor-speed:
     runs-on: ubuntu-latest
@@ -72,5 +85,17 @@ jobs:
           echo "Disk Info:"
           df -h /
 
-      - name: Run benchmark
+      - name: Benchmark 1GB
+        env:
+          OBJECT_SIZE: 1GB
+        run: python benchmark.py
+
+      - name: Benchmark 10GB
+        env:
+          OBJECT_SIZE: 10GB
+        run: python benchmark.py
+
+      - name: Benchmark 100GB
+        env:
+          OBJECT_SIZE: 100GB
         run: python benchmark.py
