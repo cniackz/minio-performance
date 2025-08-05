@@ -68,7 +68,9 @@ for i in range(total_iterations):
     # 🧹 Clean up
     client.remove_object(bucket, object_name)
 
-    print(f"[{i+1}/{total_iterations}] PUT: {upload_times[-1]:.2f}s, GET: {download_times[-1]:.2f}s")
+    upload_ms = upload_times[-1] * 1000
+    download_ms = download_times[-1] * 1000
+    print(f"[{i+1}/{total_iterations}] PUT: {upload_ms:.1f}ms, GET: {download_ms:.1f}ms")
 
-print(f"\nAverage PUT: {statistics.mean(upload_times):.2f}s")
-print(f"Average GET: {statistics.mean(download_times):.2f}s")
+print(f"\nAverage PUT: {statistics.mean(upload_times)*1000:.1f}ms")
+print(f"Average GET: {statistics.mean(download_times)*1000:.1f}ms")

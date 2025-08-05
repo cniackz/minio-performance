@@ -34,19 +34,19 @@ jobs:
           echo "Disk Info:"
           df -h /
 
+      - name: Benchmark 128KB
+        env:
+          OBJECT_SIZE: 128KB
+        run: python benchmark.py
+
+      - name: Benchmark 1MB
+        env:
+          OBJECT_SIZE: 1MB
+        run: python benchmark.py
+
       - name: Benchmark 1GB
         env:
           OBJECT_SIZE: 1GB
-        run: python benchmark.py
-
-      - name: Benchmark 10GB
-        env:
-          OBJECT_SIZE: 10GB
-        run: python benchmark.py
-
-      - name: Benchmark 100GB
-        env:
-          OBJECT_SIZE: 100GB
         run: python benchmark.py
 
   aistor-speed-single-disk:
@@ -84,19 +84,19 @@ jobs:
           echo "Disk Info:"
           df -h /
 
+      - name: Benchmark 128KB
+        env:
+          OBJECT_SIZE: 128KB
+        run: python benchmark.py
+
+      - name: Benchmark 1MB
+        env:
+          OBJECT_SIZE: 1MB
+        run: python benchmark.py
+
       - name: Benchmark 1GB
         env:
           OBJECT_SIZE: 1GB
-        run: python benchmark.py
-
-      - name: Benchmark 10GB
-        env:
-          OBJECT_SIZE: 10GB
-        run: python benchmark.py
-
-      - name: Benchmark 100GB
-        env:
-          OBJECT_SIZE: 100GB
         run: python benchmark.py
 
   minio-speed-multiple-disk:
@@ -130,19 +130,19 @@ jobs:
           echo "Disk Info:"
           df -h /
 
+      - name: Benchmark 128KB
+        env:
+          OBJECT_SIZE: 128KB
+        run: python benchmark.py
+
+      - name: Benchmark 1MB
+        env:
+          OBJECT_SIZE: 1MB
+        run: python benchmark.py
+
       - name: Benchmark 1GB
         env:
           OBJECT_SIZE: 1GB
-        run: python benchmark.py
-
-      - name: Benchmark 10GB
-        env:
-          OBJECT_SIZE: 10GB
-        run: python benchmark.py
-
-      - name: Benchmark 100GB
-        env:
-          OBJECT_SIZE: 100GB
         run: python benchmark.py
 
   aistor-speed-mutiple-disk:
@@ -181,18 +181,18 @@ jobs:
           echo "Disk Info:"
           df -h /
 
+      - name: Benchmark 128KB
+        env:
+          OBJECT_SIZE: 128KB
+        run: python benchmark.py
+
+      - name: Benchmark 1MB
+        env:
+          OBJECT_SIZE: 1MB
+        run: python benchmark.py
+
       - name: Benchmark 1GB
         env:
           OBJECT_SIZE: 1GB
-        run: python benchmark.py
-
-      - name: Benchmark 10GB
-        env:
-          OBJECT_SIZE: 10GB
-        run: python benchmark.py
-
-      - name: Benchmark 100GB
-        env:
-          OBJECT_SIZE: 100GB
         run: python benchmark.py
 
