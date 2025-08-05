@@ -27,21 +27,25 @@ client = Minio("localhost:9000", access_key="minioadmin", secret_key="minioadmin
 
 bucket = "bench-loop"
 version = os.environ.get("MINIO_VERSION", "unknown")
-
-# Define object size from env (e.g., "1GB", "10GB", "100GB")
 size_str = os.environ.get("OBJECT_SIZE", "1GB").upper()
-size_map = {"128KB": 10, "1MB": 10, "1GB": 10}
-object_size = size_map.get(size_str, 1) * 1024 * 1024 * 1024
-object_name = f"testfile-{size_str}"
-data = b"x" * (1024 * 1024)  # 1MB buffer reused
+mode = os.environ.get("MODE", "single-disk").lower()  # <- "multi-disk" or "single-disk"
 
-# Set number of iterations based on object size
-iteration_map = {"1GB": 30, "10GB": 5, "100GB": 1}
+# Size in bytes
+size_map = {"128KB": 128 * 1024, "1MB": 1 * 1024 * 1024, "1GB": 1 * 1024 * 1024 * 1024}
+object_size = size_map.get(size_str, 1 * 1024 * 1024)
+
+# Iteration strategy based on mode
+if mode == "multi-disk":
+    iteration_map = {"128KB": 50, "1MB": 20, "1GB": 2}
+else:
+    iteration_map = {"128KB": 100, "1MB": 50, "1GB": 10}
+
 total_iterations = iteration_map.get(size_str, 1)
+object_name = f"testfile-{size_str}"
 
 print(f"\nFile Size: {size_str}")
 print(f"MinIO Version: {version}")
-print(f"Running {total_iterations} iterations...\n")
+print(f"Running {total_iterations} iterations in mode: {mode}\n")
 
 if not client.bucket_exists(bucket):
     client.make_bucket(bucket)
@@ -61,7 +65,7 @@ for i in range(total_iterations):
     response.close()
     download_times.append(time.time() - start)
 
-    # 🧹 Clean up to free space
+    # 🧹 Clean up
     client.remove_object(bucket, object_name)
 
     print(f"[{i+1}/{total_iterations}] PUT: {upload_times[-1]:.2f}s, GET: {download_times[-1]:.2f}s")
