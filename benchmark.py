@@ -1,6 +1,16 @@
 from minio import Minio
 import time, io, statistics, sys, os
 
+class FakeStream(io.RawIOBase):
+    def __init__(self, size):
+        self.remaining = size
+    def read(self, n=-1):
+        if self.remaining <= 0:
+            return b""
+        chunk = min(n, self.remaining)
+        self.remaining -= chunk
+        return b"x" * chunk
+
 # Flush output line by line for GitHub Actions
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -17,7 +27,7 @@ object_name = f"testfile-{size_str}"
 data = b"x" * (1024 * 1024)  # 1MB buffer reused
 
 # Set number of iterations based on object size
-iteration_map = {"1GB": 300, "10GB": 5, "100GB": 1}
+iteration_map = {"1GB": 30, "10GB": 5, "100GB": 1}
 total_iterations = iteration_map.get(size_str, 1)
 
 print(f"\nFile Size: {size_str}")
@@ -31,7 +41,8 @@ upload_times, download_times = [], []
 for i in range(total_iterations):
     # Upload
     start = time.time()
-    client.put_object(bucket, object_name, io.BytesIO(b"x" * object_size), object_size)
+    stream = io.BufferedReader(FakeStream(object_size))
+    client.put_object(bucket, object_name, stream, object_size)
     upload_times.append(time.time() - start)
 
     # Download

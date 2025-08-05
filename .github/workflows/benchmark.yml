@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  minio-speed:
+  minio-speed-single-disk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,8 +49,7 @@ jobs:
           OBJECT_SIZE: 100GB
         run: python benchmark.py
 
-
-  aistor-speed:
+  aistor-speed-single-disk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -99,3 +98,101 @@ jobs:
         env:
           OBJECT_SIZE: 100GB
         run: python benchmark.py
+
+  minio-speed-multiple-disk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          pip install -r requirements.txt
+
+      - name: Download and start MinIO
+        run: |
+          wget https://dl.min.io/server/minio/release/linux-amd64/minio
+          chmod +x minio
+          VERSION=$(./minio --version | head -n1 | awk '{print $3}')
+          echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
+          mkdir -p /tmp/disk{1..4}
+          ./minio server /tmp/disk{1..4} --address ":9000" &
+          sleep 5
+
+      - name: Runner Info
+        run: |
+          echo "CPU Info:"
+          lscpu
+          echo "Memory Info:"
+          free -h
+          echo "Disk Info:"
+          df -h /
+
+      - name: Benchmark 1GB
+        env:
+          OBJECT_SIZE: 1GB
+        run: python benchmark.py
+
+      - name: Benchmark 10GB
+        env:
+          OBJECT_SIZE: 10GB
+        run: python benchmark.py
+
+      - name: Benchmark 100GB
+        env:
+          OBJECT_SIZE: 100GB
+        run: python benchmark.py
+
+  aistor-speed-mutiple-disk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          pip install -r requirements.txt
+
+      - name: Write AIStore license
+        run: echo "$AISTOR_LICENSE" > license.txt
+        env:
+          AISTOR_LICENSE: ${{ secrets.AISTOR_LICENSE }}
+
+      - name: Start AIStore
+        run: |
+          wget https://dl.min.io/aistor/minio/release/linux-amd64/minio
+          chmod +x minio
+          VERSION=$(./minio --version | head -n1 | awk '{print $3}')
+          echo "MINIO_VERSION=$VERSION" >> $GITHUB_ENV
+          mkdir -p /tmp/disk{1..4}
+          ./minio server /tmp/disk{1..4} --address ":9000" --license license.txt &
+          sleep 5
+
+      - name: Runner Info
+        run: |
+          echo "CPU Info:"
+          lscpu
+          echo "Memory Info:"
+          free -h
+          echo "Disk Info:"
+          df -h /
+
+      - name: Benchmark 1GB
+        env:
+          OBJECT_SIZE: 1GB
+        run: python benchmark.py
+
+      - name: Benchmark 10GB
+        env:
+          OBJECT_SIZE: 10GB
+        run: python benchmark.py
+
+      - name: Benchmark 100GB
+        env:
+          OBJECT_SIZE: 100GB
+        run: python benchmark.py
+
