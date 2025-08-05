@@ -4,14 +4,21 @@ import time, io, statistics, sys, os
 class FakeStream(io.RawIOBase):
     def __init__(self, size):
         self.remaining = size
+    def readable(self):
+        return True
     def read(self, n=-1):
         if self.remaining <= 0:
             return b""
         chunk = min(n, self.remaining)
         self.remaining -= chunk
         return b"x" * chunk
-    def readable(self):
-        return True
+    def readinto(self, b):
+        if self.remaining <= 0:
+            return 0
+        chunk = min(len(b), self.remaining)
+        b[:chunk] = b"x" * chunk
+        self.remaining -= chunk
+        return chunk
 
 # Flush output line by line for GitHub Actions
 sys.stdout.reconfigure(line_buffering=True)
